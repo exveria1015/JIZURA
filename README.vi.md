@@ -1,5 +1,7 @@
 # JIZURA — Công cụ tạo video lời bài hát kèm hiệu ứng chuyển động
 
+> **Independent fork: exveria1015/JIZURA.** This development build has no hosted site. See [FORK.md](FORK.md) for local use and integration notes. Links to `852wa.github.io` below refer to the original upstream release.
+
 Biến lời bài hát thành video lyric động ngay trong trình duyệt. JIZURA kết hợp bố cục, hiệu ứng xuất hiện, giữ hình, biến mất, trang trí, cách xử lý chữ, hình nền, chuyển động camera, hiệu ứng màn hình và chuyển cảnh. Có thể đổi seed hoặc nhấn **Tạo biến thể** (Tạo biến thể) để khám phá một cách sắp xếp khác.
 
 **[Tiếng Việt](https://852wa.github.io/JIZURA/vi/)** · [English](https://852wa.github.io/JIZURA/en/) · [Bahasa Indonesia](https://852wa.github.io/JIZURA/id/) · [日本語版](https://852wa.github.io/JIZURA/) · [繁體中文](https://852wa.github.io/JIZURA/zh-hant/) · [简体中文](https://852wa.github.io/JIZURA/zh-hans/) · [한국어](https://852wa.github.io/JIZURA/ko/) · [Korean guide](README.ko.md) · [Japanese guide](README.md)

@@ -250,7 +250,7 @@ J.drawHUD = (env, plan) => {
   const rec = env.step % 4 < 2;
   if (rec) env.circle(W - m - L * 2.6, m + L * 0.9, fs * 0.32, sc.accent, null, 0, 1, false);
   env.draw({ text: 'REC', font: mono, size: fs, align: 'left', x: W - m - L * 2.2, y: m + L * 0.9, color: c, ghost: false, track: 0.1 });
-  env.draw({ text: J.fmtTime(env.t, plan.fps), font: mono, size: fs, align: 'left', x: m + L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
+  env.draw({ text: J.fmtTime(env.t, plan.fps), txSlot: 'time', font: mono, size: fs, align: 'left', x: m + L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
   const li = env.cut ? (env.cut.line | 0) + 1 : 0;
   env.draw({ text: `LYRIC ${String(li).padStart(2, '0')}/${String(plan.lines.length).padStart(2, '0')}`, font: mono, size: fs, align: 'right', x: W - m - L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
   const u = plan.duration > 0 ? J.clamp(env.t / plan.duration) : 0;

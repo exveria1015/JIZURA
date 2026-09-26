@@ -499,7 +499,7 @@ J.LAYOUTS = {
       if (P.prompt) env.draw({ text: '>', font: env.st.fonts.mono[0] || 'mono', size: size * 0.8, x: (left ? x : x - J.measure({ text, font: P.font, size, track: 0.06 }).w / 2) - size * 0.9, y: H / 2 - (text.split('\n').length - 1) * size * 0.67, color: sc.accent, ghost: false });
       const bb = J.mainDraw(env, { text, font: P.font, size, x, y: H / 2, align: left ? 'left' : 'center', track: 0.06, lead: 1.35, color: sc.fg, enter: env.cut.enter === 'cut' ? 'type' : undefined });
       const ms = J.clamp(H * 0.02, 12, 20);
-      env.draw({ text: `LINE ${String((env.cut.line | 0) + 1).padStart(2, '0')} ─ ${J.fmtTime(env.t)}`, font: env.st.fonts.mono[0] || 'mono', size: ms, align: 'left', x: W * 0.13, y: H * 0.8, color: sc.sub, alpha: 0.8, ghost: false });
+      env.draw({ text: `LINE ${String((env.cut.line | 0) + 1).padStart(2, '0')} ─ ${J.fmtTime(env.t)}`, txSlot: 'no+time', font: env.st.fonts.mono[0] || 'mono', size: ms, align: 'left', x: W * 0.13, y: H * 0.8, color: sc.sub, alpha: 0.8, ghost: false });
       return bb;
     },
   },

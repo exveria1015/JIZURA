@@ -40,4 +40,14 @@ const closeTags = timing('[00:00.00]A\n[00:01.00]B\n[00:01.00]C', { 0: 100, 1: 1
 assert.deepEqual(closeTags.starts.map(x => +x.toFixed(3)), [0.8, 0.9, 1]);
 assert.deepEqual(closeTags.ends.slice(0, 2).map(x => +x.toFixed(3)), [0.9, 1]);
 
+// Mixed-LRC automatic rows must respect the normalized manual anchor and
+// the following real LRC, including when both fit before the default offset.
+const earlyMixed = timing('one\ntwo\n[00:00.10]A', { 1: 10 });
+assert.deepEqual(earlyMixed.starts, [0, 0.05, 0.1]);
+assert.deepEqual(earlyMixed.ends.slice(0, 2), [0.05, 0.1]);
+const mixedLyrics = '[00:10]A\none\ntwo\n[00:11]B';
+assert.deepEqual(timing(mixedLyrics, { 1: 30 }).starts, [10, 10.8, 10.9, 11]);
+assert.deepEqual(timing(mixedLyrics, { 2: -1 }).starts, [10, 10.1, 10.2, 11]);
+assert.deepEqual(timing('[00:10]A\none\n[00:10]B', { 1: 20 }).starts, [10, 10, 10]);
+
 console.log('line_times_test: passed');

@@ -6,9 +6,8 @@
 
 const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0';
 const MODELS = Object.freeze({
-  base: { id: 'onnx-community/whisper-base', label: 'Base' },
-  tiny: { id: 'onnx-community/whisper-tiny', label: 'Tiny' },
-  small: { id: 'onnx-community/whisper-small', label: 'Small' },
+  base: { id: 'onnx-community/whisper-base', revision: '1846881b6b3a3024392c1eea3ad983695bc23925', label: 'Base' },
+  tiny: { id: 'onnx-community/whisper-tiny', revision: 'ff4177021cc41f7db950912b73ea4fdf7d01d8e7', label: 'Tiny' },
 });
 const SAMPLE_RATE = 16000;
 let libraryPromise = null;
@@ -45,6 +44,7 @@ function modelProgress(onProgress, device) {
 async function createPipeline(mod, model, device, onProgress) {
   const options = {
     device,
+    revision: model.revision,
     progress_callback: modelProgress(onProgress, device),
   };
   // Keep the first version light enough for typical desktop browsers.
@@ -161,12 +161,14 @@ function toLrc(result) {
   const rows = [], chunks = result && Array.isArray(result.chunks) ? result.chunks : [];
   for (const chunk of chunks) {
     const text = cleanText(chunk && chunk.text), time = chunk && chunk.timestamp;
-    if (!text || !Array.isArray(time) || !Number.isFinite(+time[0])) continue;
-    const row = timestamp(+time[0]) + text;
+    if (!text) continue;
+    // Keep untimed text untimed; null must not become a fabricated zero anchor.
+    const timed = Array.isArray(time) && typeof time[0] === 'number' && Number.isFinite(time[0]) && time[0] >= 0;
+    const row = (timed ? timestamp(time[0]) : '') + text;
     if (rows[rows.length - 1] !== row) rows.push(row);
   }
   const whole = cleanText(result && result.text);
-  if (!rows.length && whole) rows.push(timestamp(0) + whole);
+  if (!rows.length && whole) rows.push(whole);
   return rows.join('\n');
 }
 
@@ -175,10 +177,13 @@ function whisperError(code, stage, cause) {
 }
 
 async function transcribe(audioBuffer, options = {}) {
+  const checkCancelled = () => { if (options.signal && options.signal.aborted) throw whisperError('CANCELLED', 'transcribe'); };
+  checkCancelled();
   const onProgress = options.onProgress;
   let runtime;
   try { runtime = await loadModel(options.model || 'base', onProgress); }
   catch (err) { throw err && err.code ? err : whisperError('MODEL_LOAD_FAILED', 'model', err); }
+  checkCancelled();
   let audio;
   try {
     notify(onProgress, { phase: 'audio-preparing', device: runtime.device });
@@ -192,13 +197,13 @@ async function transcribe(audioBuffer, options = {}) {
     chunk_length_s: 30,
     stride_length_s: 5,
     force_full_sequences: false,
-    // Be less eager to discard quiet/fast sung phrases as silence.
-    no_speech_threshold: 0.8,
+    language: options.language && options.language !== 'auto' ? options.language : 'japanese',
   };
-  if (options.language && options.language !== 'auto') params.language = options.language;
+  checkCancelled();
   notify(onProgress, { phase: 'transcribing', device: runtime.device });
   try {
     const result = await runtime.pipe(audio, params);
+    checkCancelled();
     const lrc = toLrc(result);
     if (!lrc) throw whisperError('EMPTY_RESULT', 'transcribe');
     notify(onProgress, { phase: 'complete', device: runtime.device });

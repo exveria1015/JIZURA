@@ -1,5 +1,7 @@
 # JIZURA — 가사 모션 비디오 메이커
 
+> **Independent fork: exveria1015/JIZURA.** This development build has no hosted site. See [FORK.md](FORK.md) for local use and integration notes. Links to `852wa.github.io` below refer to the original upstream release.
+
 가사를 입력하면 브라우저에서 리릭 모션 영상을 자동으로 구성하고 MP4로 내보낼 수 있습니다. JIZURA는 레이아웃, 등장, 유지, 퇴장, 장식, 글자 효과, 배경, 카메라, 화면 효과, 전환을 조합하며, 시드를 바꾸거나 **자동으로 만들기**를 누르면 다른 구성을 만들 수 있습니다.
 
 **[한국어판 열기](https://852wa.github.io/JIZURA/ko/)** · [Tiếng Việt](https://852wa.github.io/JIZURA/vi/) · [日本語版](https://852wa.github.io/JIZURA/) · [English](https://852wa.github.io/JIZURA/en/) · [일본어 가이드](README.md)

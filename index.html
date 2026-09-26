@@ -5,18 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JIZURA 字面</title>
 <meta name="description" content="歌詞を入れると文字PV（リリックモーション）を自動で組み立てて MP4 に書き出すブラウザアプリ">
-<link rel="canonical" href="https://852wa.github.io/JIZURA/">
-<link rel="alternate" hreflang="ja" href="https://852wa.github.io/JIZURA/">
-<link rel="alternate" hreflang="en" href="https://852wa.github.io/JIZURA/en/">
-<link rel="alternate" hreflang="zh-Hant" href="https://852wa.github.io/JIZURA/zh-hant/">
-<link rel="alternate" hreflang="zh-Hans" href="https://852wa.github.io/JIZURA/zh-hans/">
-<link rel="alternate" hreflang="ko" href="https://852wa.github.io/JIZURA/ko/">
-<link rel="alternate" hreflang="id-ID" href="https://852wa.github.io/JIZURA/id/">
-<link rel="alternate" hreflang="vi" href="https://852wa.github.io/JIZURA/vi/">
+
+
 <meta property="og:type" content="website">
 <meta property="og:title" content="JIZURA 字面">
 <meta property="og:description" content="歌詞を入れると文字PV（リリックモーション）を自動で組み立てて MP4 に書き出すブラウザアプリ">
-<meta property="og:url" content="https://852wa.github.io/JIZURA/">
+
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -547,7 +541,7 @@ button.small.primary { padding: 4px 12px; }
           <div class="sec-h"><h3 class="whisper-title">AI文字起こし</h3><span id="whisperDevice" class="muted mono"></span></div>
           <div class="whisper-fields">
             <label class="field">言語
-              <select id="whisperLang"><option value="auto">自動判定</option><option value="japanese">日本語</option><option value="english">英語</option></select>
+              <select id="whisperLang"><option value="japanese">日本語</option><option value="english">英語</option></select>
             </label>
             <label class="field">モデル
               <select id="whisperModel"><option value="base">高精度 Base（推奨）</option><option value="tiny">高速 Tiny</option></select>
@@ -555,9 +549,10 @@ button.small.primary { padding: 4px 12px; }
           </div>
           <div class="whisper-actions">
             <button id="btnWhisper" class="accent">AIで歌詞を文字起こし</button>
+            <button id="btnDiscardWhisper" hidden>結果を破棄</button>
           </div>
           <p id="whisperFirstNote" class="whisper-note muted">原曲を直接解析し、歌声を拾いやすい音量と帯域へ自動調整します。高精度 BaseはTinyより時間とメモリを使います。</p>
-          <p class="whisper-note muted">初回のみ選択したAIモデルを読み込みます。ダウンロード後はブラウザにキャッシュされます。</p>
+          <p class="whisper-note muted">初回やキャッシュがない場合は、選択したAIモデルをダウンロードします。</p>
           <div id="whisperProgressBox" class="whisper-progress" hidden>
             <div class="progress" role="progressbar" aria-label="AI文字起こしの進行状況" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="whisperBar"></i></div>
             <div class="whisper-status-row"><span id="whisperStatus" role="status" aria-live="polite">準備中</span><span id="whisperPercent" class="mono">0%</span></div>
@@ -3019,7 +3014,7 @@ J.LAYOUTS = {
       if (P.prompt) env.draw({ text: '>', font: env.st.fonts.mono[0] || 'mono', size: size * 0.8, x: (left ? x : x - J.measure({ text, font: P.font, size, track: 0.06 }).w / 2) - size * 0.9, y: H / 2 - (text.split('\n').length - 1) * size * 0.67, color: sc.accent, ghost: false });
       const bb = J.mainDraw(env, { text, font: P.font, size, x, y: H / 2, align: left ? 'left' : 'center', track: 0.06, lead: 1.35, color: sc.fg, enter: env.cut.enter === 'cut' ? 'type' : undefined });
       const ms = J.clamp(H * 0.02, 12, 20);
-      env.draw({ text: `LINE ${String((env.cut.line | 0) + 1).padStart(2, '0')} ─ ${J.fmtTime(env.t)}`, font: env.st.fonts.mono[0] || 'mono', size: ms, align: 'left', x: W * 0.13, y: H * 0.8, color: sc.sub, alpha: 0.8, ghost: false });
+      env.draw({ text: `LINE ${String((env.cut.line | 0) + 1).padStart(2, '0')} ─ ${J.fmtTime(env.t)}`, txSlot: 'no+time', font: env.st.fonts.mono[0] || 'mono', size: ms, align: 'left', x: W * 0.13, y: H * 0.8, color: sc.sub, alpha: 0.8, ghost: false });
       return bb;
     },
   },
@@ -3428,7 +3423,7 @@ J.drawHUD = (env, plan) => {
   const rec = env.step % 4 < 2;
   if (rec) env.circle(W - m - L * 2.6, m + L * 0.9, fs * 0.32, sc.accent, null, 0, 1, false);
   env.draw({ text: 'REC', font: mono, size: fs, align: 'left', x: W - m - L * 2.2, y: m + L * 0.9, color: c, ghost: false, track: 0.1 });
-  env.draw({ text: J.fmtTime(env.t, plan.fps), font: mono, size: fs, align: 'left', x: m + L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
+  env.draw({ text: J.fmtTime(env.t, plan.fps), txSlot: 'time', font: mono, size: fs, align: 'left', x: m + L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
   const li = env.cut ? (env.cut.line | 0) + 1 : 0;
   env.draw({ text: `LYRIC ${String(li).padStart(2, '0')}/${String(plan.lines.length).padStart(2, '0')}`, font: mono, size: fs, align: 'right', x: W - m - L * 0.6, y: H - m - L * 0.9, color: c, ghost: false, track: 0.1 });
   const u = plan.duration > 0 ? J.clamp(env.t / plan.duration) : 0;
@@ -3582,9 +3577,12 @@ const segmenterOf = () => {
   if (!(loc in segmenters)) { try { segmenters[loc] = new Intl.Segmenter(loc, { granularity: 'word' }); } catch (e) { segmenters[loc] = null; } }
   return segmenters[loc];
 };
+const SPACED = /[A-Za-z\u00c0-\u024f\uac00-\ud7a3]/;   // scripts that put spaces between words (Latin, Korean hangul)
+// rejoin spaced words: a word ending in a dash was split out of "menu\u2014different", so no space goes after it
+const joinWords = ws => ws.reduce((s, w) => s + (s && !/[\u2013\u2014]$/.test(s) ? ' ' : '') + w, '');
 const segType = s => {
   if (/^\s+$/.test(s)) return 'S';
-  if ([...s].every(c => J.isPunct(c))) return 'P';
+  if ([...s].every(c => J.isPunct(c) || c === '\u2013' || c === '\u2014')) return 'P';
   if ([...s].some(c => J.isKanji(c))) return 'K';
   if ([...s].every(c => J.isHira(c) || c === 'ー')) return 'H';
   if ([...s].every(c => J.isKata(c) || c === 'ー')) return 'T';
@@ -3610,6 +3608,7 @@ J.chunkText = (text) => {
   for (const sg of segs) {
     const t = segType(sg);
     if (t === 'S') { close(); continue; }
+    if (t === 'P' && !cur && /^['’]$/.test(sg)) { cur = { s: sg, k: 'L', hasH: false }; continue; }   // a leading apostrophe ('em, 'cause) belongs to the next word
     if (t === 'P') { if (cur) cur.s += sg; else if (chunks.length) chunks[chunks.length - 1] += sg; else cur = { s: sg, k: 'P', hasH: false }; continue; }
     if (!cur) { cur = { s: sg, k: t, hasH: t === 'H' }; continue; }
     if (t === 'H') {
@@ -3623,15 +3622,25 @@ J.chunkText = (text) => {
     close(); cur = { s: sg, k: t, hasH: t === 'H' };
   }
   close();
-  // split very long chunks, merge lonely single kana
+  // split very long chunks (but never inside one Latin word — "unforge ttable"), merge lonely single kana
   const out = [];
-  for (const c of chunks) {
-    const n = [...c].length;
-    if (n > 10) { J.splitLines(c, Math.ceil(n / Math.ceil(n / 8))).split('\n').forEach(x => out.push(x)); }
-    else out.push(c);
+  const LATIN_WORD = /^[\x21-\x7e\u00c0-\u024f\u2013\u2014\u2018\u2019\u201c\u201d]+$/;
+  for (const c0 of chunks) {
+    // Latin words joined by a dash ("paintbrush\u2014we") break after the dash first
+    const parts = SPACED.test(c0) && /[\u2013\u2014]./.test(c0) ? c0.split(/(?<=[\u2013\u2014])/) : [c0];
+    for (const c of parts) {
+      const n = [...c].length;
+      if (n > 10 && !LATIN_WORD.test(c)) { J.splitLines(c, Math.ceil(n / Math.ceil(n / 8))).split('\n').forEach(x => out.push(x)); }
+      else out.push(c);
+    }
   }
   for (let i = out.length - 1; i > 0; i--) {
-    if ([...out[i]].length === 1 && !J.isKanji(out[i])) { out[i - 1] += out[i]; out.splice(i, 1); }
+    // a lone Latin letter / hangul syllable after a Latin / hangul chunk is a word of its own (a, 나, 가 …) — keep the space
+    if ([...out[i]].length === 1 && !J.isKanji(out[i])) {
+      out[i - 1] = SPACED.test(out[i]) && SPACED.test(out[i - 1])
+        ? joinWords([out[i - 1], out[i]]) : out[i - 1] + out[i];
+      out.splice(i, 1);
+    }
   }
   return out.length ? out : [text];
 };
@@ -3639,7 +3648,7 @@ J.chunkText = (text) => {
 /* English lyrics: cut by short phrases, not word by word (a Japanese chunk holds about as much as 2–3 English words) */
 J.phraseChunks = (words) => {
   const out = []; let cur = [], letters = 0;
-  const flush = () => { if (cur.length) out.push(cur.join(' ')); cur = []; letters = 0; };
+  const flush = () => { if (cur.length) out.push(joinWords(cur)); cur = []; letters = 0; };
   for (const w of words) {
     const n = (w.match(/[A-Za-z\u00c0-\u024f0-9]/g) || []).length;
     cur.push(w); letters += n;
@@ -3647,7 +3656,7 @@ J.phraseChunks = (words) => {
   }
   flush();
   // a lone short word at the end joins the previous phrase
-  if (out.length >= 2 && out[out.length - 1].replace(/[^A-Za-z]/g, '').length <= 4) { const last = out.pop(); out[out.length - 1] += ' ' + last; }
+  if (out.length >= 2 && out[out.length - 1].replace(/[^A-Za-z]/g, '').length <= 4) { const last = out.pop(); out[out.length - 1] = joinWords([out[out.length - 1], last]); }
   return out.length ? out : words;
 };
 
@@ -3717,7 +3726,10 @@ J.computeTiming = (project, parsed, audio) => {
       // explicit time when the lines are a mixture of timed and untimed rows.
       if (parsed.mixedLrc && nextExplicit[i] != null) {
         const lo = i ? starts[i - 1] : 0;
-        s = Math.min(s, Math.max(lo, nextExplicit[i] - 0.35));
+        // A raw manual value may itself be clamped by a later LRC anchor.
+        // Keep the automatic prefix before that anchor as well.
+        const until = Math.min(nextExplicit[i], nextFixed[i] ?? Infinity);
+        s = Math.min(s, Math.max(lo, until - 0.35));
       }
     }
     starts.push(s);
@@ -3877,7 +3889,7 @@ J.plan = (project, audio) => {
     let groups;
     const nG = Math.min(nC, chunks2.length);
     if (nG <= 1) groups = [ln.text];
-    else groups = partition(chunks2, nG).map(g => g.join(/[A-Za-z]/.test(g.join('')) ? ' ' : ''));
+    else groups = partition(chunks2, nG).map(g => SPACED.test(g.join('')) ? joinWords(g) : g.join(''));
     const recap = !fixedN && nC > groups.length && groups.length >= 2;
     let units = groups.map(g => ({ text: g, w: [...g].length + 1.6 }));
     if (recap) units.push({ text: ln.text, w: (units.reduce((a, u) => a + u.w, 0) / units.length) * 1.25, recap: true });
@@ -4114,7 +4126,12 @@ J.plan = (project, audio) => {
       const k = kof[c.line] || 0; kof[c.line] = k + 1;
       const o = (project.overrides || {})[c.line] || {};
       const tx = o.cutText && (o.cutText[k] || o.cutText[String(k)]);
-      if (tx) c.tx = tx;
+      if (tx) {
+        c.tx = tx;
+        // Both bands are views of this cut: replacements and visibility
+        // controls apply independently to each band's layout text.
+        if (c.companion) c.companion.tx = tx;
+      }
     }
   }
   plan.events.sort((a, b) => a.t - b.t);
@@ -5352,9 +5369,8 @@ J.beatGrid = (bpm, offset, duration) => {
 
 const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0';
 const MODELS = Object.freeze({
-  base: { id: 'onnx-community/whisper-base', label: 'Base' },
-  tiny: { id: 'onnx-community/whisper-tiny', label: 'Tiny' },
-  small: { id: 'onnx-community/whisper-small', label: 'Small' },
+  base: { id: 'onnx-community/whisper-base', revision: '1846881b6b3a3024392c1eea3ad983695bc23925', label: 'Base' },
+  tiny: { id: 'onnx-community/whisper-tiny', revision: 'ff4177021cc41f7db950912b73ea4fdf7d01d8e7', label: 'Tiny' },
 });
 const SAMPLE_RATE = 16000;
 let libraryPromise = null;
@@ -5391,6 +5407,7 @@ function modelProgress(onProgress, device) {
 async function createPipeline(mod, model, device, onProgress) {
   const options = {
     device,
+    revision: model.revision,
     progress_callback: modelProgress(onProgress, device),
   };
   // Keep the first version light enough for typical desktop browsers.
@@ -5507,12 +5524,14 @@ function toLrc(result) {
   const rows = [], chunks = result && Array.isArray(result.chunks) ? result.chunks : [];
   for (const chunk of chunks) {
     const text = cleanText(chunk && chunk.text), time = chunk && chunk.timestamp;
-    if (!text || !Array.isArray(time) || !Number.isFinite(+time[0])) continue;
-    const row = timestamp(+time[0]) + text;
+    if (!text) continue;
+    // Keep untimed text untimed; null must not become a fabricated zero anchor.
+    const timed = Array.isArray(time) && typeof time[0] === 'number' && Number.isFinite(time[0]) && time[0] >= 0;
+    const row = (timed ? timestamp(time[0]) : '') + text;
     if (rows[rows.length - 1] !== row) rows.push(row);
   }
   const whole = cleanText(result && result.text);
-  if (!rows.length && whole) rows.push(timestamp(0) + whole);
+  if (!rows.length && whole) rows.push(whole);
   return rows.join('\n');
 }
 
@@ -5521,10 +5540,13 @@ function whisperError(code, stage, cause) {
 }
 
 async function transcribe(audioBuffer, options = {}) {
+  const checkCancelled = () => { if (options.signal && options.signal.aborted) throw whisperError('CANCELLED', 'transcribe'); };
+  checkCancelled();
   const onProgress = options.onProgress;
   let runtime;
   try { runtime = await loadModel(options.model || 'base', onProgress); }
   catch (err) { throw err && err.code ? err : whisperError('MODEL_LOAD_FAILED', 'model', err); }
+  checkCancelled();
   let audio;
   try {
     notify(onProgress, { phase: 'audio-preparing', device: runtime.device });
@@ -5538,13 +5560,13 @@ async function transcribe(audioBuffer, options = {}) {
     chunk_length_s: 30,
     stride_length_s: 5,
     force_full_sequences: false,
-    // Be less eager to discard quiet/fast sung phrases as silence.
-    no_speech_threshold: 0.8,
+    language: options.language && options.language !== 'auto' ? options.language : 'japanese',
   };
-  if (options.language && options.language !== 'auto') params.language = options.language;
+  checkCancelled();
   notify(onProgress, { phase: 'transcribing', device: runtime.device });
   try {
     const result = await runtime.pipe(audio, params);
+    checkCancelled();
     const lrc = toLrc(result);
     if (!lrc) throw whisperError('EMPTY_RESULT', 'transcribe');
     notify(onProgress, { phase: 'complete', device: runtime.device });
@@ -7137,12 +7159,12 @@ reg('cam', 'jelly', { name: 'ぷるん', tags: ['pop', 'graphic'], w: 0.7,
 
 /* JIZURA pack: レイアウト文字 — per-cut control of every text a layout draws.
 
-   Every layout (186 of them, incl. the packs upstream keeps adding) paints its text through
-   J.drawItem(), so one wrapper covers all of them and does both halves of the feature:
+   Standard text passes through J.drawItem(); optimized Canvas painters use J.txDirect.
+   Both paths share the same recorder and filter:
 
      · probe  — report which strings this cut's layout really draws, so the panel lists
                 exactly those rows (a layout that never prints a number shows no number row)
-     · apply  — hide / replace them, again without touching any layout's render code
+     · apply  — hide / replace them before painting
 
    A drawn string is matched to a slot by comparing *normalised* forms, because layouts
    rewrite what they are handed: they strip spaces, wrap lines with \n, split the line into
@@ -7190,23 +7212,25 @@ J.txSlotOf = (cut, str, env) => {
   const main = norm(cut.text), note = norm(cut.note), line = norm(cut.lineText || cut.text);
   const tag = pad2((cut.line | 0) + 1);
   const noS = 'No.' + tag, hashS = '#' + tag;
-  const tm = J.fmtTime(cut.start), live = env ? J.fmtTime(env.t) : '';
+  const times = [J.fmtTime(cut.start)];
+  if (env) times.push(J.fmtTime(env.t), J.fmtTime(env.t, env.fps || (env.plan && env.plan.fps)));
+  const hasTime = times.some(t => n.includes(norm(t)));
   // serial number / timecode, alone or glued together — one drawing, so the panel shows a
   // single row for the pair and strips whichever half was switched off
   const hasNo = n.includes(noS) || n.includes(hashS);
-  const hasTm = (!!tm && n.includes(norm(tm))) || (!!live && n.includes(norm(live)));
-  if (hasNo || hasTm) {
-    if (n === noS || n === hashS) return hasTm ? 'no+time' : 'no';
-    if ((tm && n === norm(tm)) || (live && n === norm(live))) return hasNo ? 'no+time' : 'time';
-    // a glued "No.01 00:00.40" is recognised by shape, not only against the current time,
-    // so the strip path works during the probe too (where there is no playhead)
-    if (hasNo && (hasTm || /\d{1,2}:\d{2}\.\d{2}/.test(n)) && n.length <= noS.length + 14) return 'no+time';
+  if (hasNo || hasTime) {
+    if (n === noS || n === hashS) return 'no';
+    if (times.some(t => n === norm(t))) return 'time';
+    if (hasNo && hasTime) return 'no+time';
+    // The type layout joins its line number and live time in one label.
+    if (hasTime && new RegExp('^LINE' + tag + '[─—/／]').test(n)) return 'no+time';
   }
+  // Latin lyrics also equal their romaji spelling: the actual body wins that ambiguity.
+  if (main && n === main) return 'main';
   if (note && n === note) return 'note';
   if (isRomajiExact(cut, n)) return 'romaji';
   const tt = cut.params && cut.params.titleText;
   if (tt && n === norm(tt)) return 'title';
-  if (main && n === main) return 'main';
   if (main && [...n].length === 1 && main.includes(n)) return 'main:split';
   // a decoration built by repeating the lyric ("nee, mada . nee, mada . ...") is still the lyric
   const SEP = /[・･／/、,،+\-]/g;
@@ -7221,6 +7245,11 @@ J.txSlotOf = (cut, str, env) => {
   return 'other';
 };
 
+// A replacement invalidates any cached glyph positions and keeps its semantic role
+// when drawItem recursively renders a blurred item into an offscreen canvas.
+const withText = (it, text, txSlot) => it.text === text ? it
+  : Object.assign({}, it, { text, txSlot, _lay: null, _m: null });
+
 /* apply a cut's override to one drawn item (null = do not draw) */
 J.txApply = (env, it) => {
   const cut = env.cut, o = cut && cut.tx;
@@ -7228,7 +7257,7 @@ J.txApply = (env, it) => {
   if (!it || it.text == null) return it;
   if (!o && !g.hideNo && !g.hideTime) return it;      // nothing switched on anywhere
   const s = String(it.text);
-  const slot = J.txSlotOf(cut, s, env);
+  const slot = it.txSlot || J.txSlotOf(cut, s, env);
   if (!slot) return it;
   const hit = k => slot === k || slot.split('+').includes(k);
   const off = k => !!(o && o[k]);                     // per-cut flag, safe when the cut has no overrides
@@ -7238,27 +7267,27 @@ J.txApply = (env, it) => {
     if (hit('no') && hit('time') && hNo && hTm) return null;
     if (slot === 'no+time') {
       if (hTm) {                                       // keep the serial number, drop only the timecode
-        const t = s.replace(/\d{1,2}:\d{2}\.\d{2}/g, '').replace(/^[\s\u3000／/]+|[\s\u3000／/]+$/g, '');
-        return t ? Object.assign({}, it, { text: t }) : null;
+        const t = s.replace(/\d+:\d{2}[.:]\d{2}/g, '').replace(/^[\s\u3000／/─—]+|[\s\u3000／/─—]+$/g, '');
+        return t ? withText(it, t, hTm ? 'no' : 'time') : null;
       }
       if (!hNo) return it;
       const t = s
-        .replace(new RegExp('(#|No\\.)\\s*' + pad2((cut.line | 0) + 1), 'g'), '')
+        .replace(new RegExp('(#|No\\.|LINE\\s*)\\s*' + pad2((cut.line | 0) + 1), 'g'), '')
         .replace(new RegExp('^\\s*' + pad2((cut.line | 0) + 1) + '\\s*[／/]\\s*'), '')
-        .replace(/^[\s\u3000／/]+|[\s\u3000／/]+$/g, '');
-      return t ? Object.assign({}, it, { text: t }) : null;
+        .replace(/^[\s\u3000／/─—]+|[\s\u3000／/─—]+$/g, '');
+      return t ? withText(it, t, hTm ? 'no' : 'time') : null;
     }
     if (hit('no')) return hNo ? null : it;
     if (hit('time')) return hTm ? null : it;
   }
-  if (hit('main')) {
+  if (hit('main') || slot === 'main:split') {
     if (off('hideMain')) return null;
-    if (o && o.main != null && slot === 'main') return Object.assign({}, it, { text: o.main });
+    if (o && o.main != null && slot === 'main') return withText(it, o.main, slot);
   } else if (hit('line')) {
     if (off('hideLine')) return null;
   } else if (hit('note')) {
     if (off('hideNote')) return null;
-    if (o && o.note != null && slot === 'note') return Object.assign({}, it, { text: o.note });
+    if (o && o.note != null && slot === 'note') return withText(it, o.note, slot);
   } else if (hit('romaji')) {
     if (off('hideRomaji')) return null;
   } else if (hit('no')) {
@@ -7267,7 +7296,7 @@ J.txApply = (env, it) => {
     if (off('hideTime')) return null;
   } else if (hit('title')) {
     if (off('hideTitle')) return null;
-    if (o && o.title != null && slot === 'title') return Object.assign({}, it, { text: o.title });
+    if (o && o.title != null && slot === 'title') return withText(it, o.title, slot);
   } else if (hit('other')) {
     if (off('hideOther')) return null;
   }
@@ -7284,30 +7313,42 @@ J.txProbe = (cut, plan) => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 8;
   const ctx = cv.getContext('2d');
   const td = Math.max(0.05, cut.dur || 0);
-  let probeEnv = null;
   for (const k of [0.2, 0.35, 0.5, 0.65, 0.8]) {
     const lt = td * k;
     const env = R.makeEnv(ctx, plan, cut, sc, { pass: 'main', layer: 'front', t: cut.start + lt, lt, ltb: lt, step: 1, scale: 1, allowFilter: false, energy: 0, bgOnly: false, zone: null });
     env.__rec = seen; env.__probe = true; env.__ly = true;
-    probeEnv = env;
     try { (J.LAYOUTS[cut.layout] || J.LAYOUTS.center).render(env); } catch (e) { /* keep what we have */ }
   }
   const order = ['main', 'main:split', 'line', 'note', 'romaji', 'no', 'time', 'title', 'other'];
   const have = new Set();
-  for (const s of seen) {
-    const slot = J.txSlotOf(cut, s, probeEnv);
-    if (slot) slot.split('+').forEach(x => have.add(x));
-  }
+  for (const slot of seen) if (slot) slot.split('+').forEach(x => have.add(x));
   return order.filter(x => have.has(x));
 };
 
-/* one wrapper over the text primitive — the single place every layout goes through */
+// Classify at draw time: a live time label differs at every probe sample.
+const record = (env, it) => {
+  if (env.__rec && it && it.text != null && String(it.text)) {
+    env.__rec.push(it.txSlot || J.txSlotOf(env.cut, it.text, env));
+  }
+};
+
+/* Optimized direct Canvas painters keep their original draw calls. Only probing or
+   enabled controls allocate an item / classify text; ordinary rendering is unchanged. */
+J.txDirect = (env, text, txSlot) => {
+  if (!env.__rec && (!env.__ly || (!(env.cut && env.cut.tx) && !(env.fx && (env.fx.hideNo || env.fx.hideTime))))) return text;
+  const it = { text, txSlot };
+  record(env, it);
+  if (env.__probe) return null;
+  const filtered = env.__ly ? J.txApply(env, it) : it;
+  return filtered ? filtered.text : null;
+};
+
+/* Standard text primitive. */
 const drawItem = J.drawItem;
 J.drawItem = (env, it) => {
   if (!env) return drawItem(env, it);
   if (env.__rec) {
-    const t = it && it.text;
-    if (t != null && String(t)) env.__rec.push(String(t));
+    record(env, it);
     if (env.__probe) return null;                       // probe: report only, never paint
   }
   if (env.__ly) { try { it = J.txApply(env, it); } catch (e) { /* never drop a frame for a label */ } if (!it) return null; }
@@ -21531,6 +21572,8 @@ function fastRow(env, text, font, size, x, y, sp, color, alpha, align = 'left') 
   if (env.pass !== 'main' || alpha <= 0.01 || !text) return;
   const ctx = env.ctx;
   if (!('letterSpacing' in ctx)) { env.draw({ text, font, size, x, y, align, track: sp / size, color, alpha, ghost: false }); return; }
+  text = J.txDirect(env, text);
+  if (text == null) return;
   ctx.save();
   ctx.font = J.fontCSS(font, size); ctx.letterSpacing = sp.toFixed(2) + 'px';
   ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.globalAlpha = alpha;
@@ -24672,7 +24715,8 @@ J.register('layout', 'dotMatrix', {
   },
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, s = cut.seed, M = Math.min(W, H), lt = env.lt;
-    const mt = mainLines(cut.text, W, H, 8, 4);
+    const mt = J.txDirect(env, mainLines(cut.text, W, H, 8, 4), 'main');
+    if (mt == null) return null; // the lit-dot mask and scan column encode the lyric too
     const lines = mt.split('\n'), maxL = Math.max(...lines.map(l => J.glyphCount(l) || 1));
     const D = J.clamp(Math.floor(W * 0.86 / (maxL * M * 0.011)), 10, 16);
     const lead = 1.3;
@@ -24715,7 +24759,7 @@ J.register('layout', 'dotMatrix', {
     if (!any) ctx.rect(-10, -10, 1, 1);
     ctx.clip();
     const fsz = smp.fscale * p;
-    const bb = J.mainDraw(env, { text: mt, font: Pm.font, size: fsz, x: W / 2 + shift * p, y: H / 2, lead, color: litC, stroke: p * 0.9, strokeColor: litC, strokeUnder: true, noHold: true, ghost: false, mi: miAt(env, t0) });
+    const bb = J.mainDraw(env, { text: mt, txSlot: 'main', font: Pm.font, size: fsz, x: W / 2 + shift * p, y: H / 2, lead, color: litC, stroke: p * 0.9, strokeColor: litC, strokeUnder: true, noHold: true, ghost: false, mi: miAt(env, t0) });
     ctx.restore();
     // bright scan column at the sweep front
     if (Pm.reveal === 'sweep' && u > 0 && u < 1) {
@@ -25404,6 +25448,8 @@ function fastRow(env, text, font, size, x, y, sp, color, alpha, align = 'left') 
   if (env.pass !== 'main' || alpha <= 0.01 || !text) return;
   const ctx = env.ctx;
   if (!('letterSpacing' in ctx)) { env.draw({ text, font, size, x, y, align, track: sp / size, color, alpha, ghost: false }); return; }
+  text = J.txDirect(env, text);
+  if (text == null) return;
   ctx.save();
   ctx.font = J.fontCSS(font, size); ctx.letterSpacing = sp.toFixed(2) + 'px';
   ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.globalAlpha = alpha;
@@ -30342,13 +30388,15 @@ reg('wordSearch', {
           if (a <= 0.01) continue;
           let row = '';
           for (let c = 0; c < C; c++) row += onPath.has(r * 64 + c) ? '\u3000' : pool[J.h(s, r, c, 9) % NP];
+          row = J.txDirect(env, row, 'other');
+          if (row == null) continue;
           ctx.globalAlpha = a; ctx.fillText(row, gx + (cell - gs) / 2, gy + (r + 0.5) * cell);
         }
         ctx.restore();
       } else {
         const cellsTxt = [], pos = [];
         for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) { if (onPath.has(r * 64 + c)) continue; cellsTxt.push(pool[J.h(s, r, c, 9) % NP]); pos.push([gx + (c + 0.5) * cell, gy + (r + 0.5) * cell, r]); }
-        const it = { text: cellsTxt.join(''), font: Pm.gf, size: gs, x: 0, y: 0, color: sc.sub, ghost: false, alpha: 0.75 * out };
+        const it = { text: cellsTxt.join(''), txSlot: 'other', font: Pm.gf, size: gs, x: 0, y: 0, color: sc.sub, ghost: false, alpha: 0.75 * out };
         it._lay = J.layoutText(it);
         it.charFn = (i, g) => { const q = pos[i]; if (!q) return { hide: true }; const a = J.clamp(ga * (R + 2) - q[2]); return { dx: q[0] - g.x, dy: q[1] - g.y, a }; };
         env.draw(it);
@@ -31234,7 +31282,8 @@ reg('mosaicTiles', {
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, s = cut.seed, u = U(env), lt = env.lt;
     const port = isPort(env);
-    const text = brk(cut.text, port ? 4 : 7);
+    const text = J.txDirect(env, brk(cut.text, port ? 4 : 7), 'main');
+    if (text == null) return null; // neither the glyph nor its sampled tile/dot shape may remain
     const lead = 1.15, D = Pm.D;
     const smp = mosaicSample(text, Pm.font, D, lead);
     if (!smp.lit.length) return null;
@@ -31274,7 +31323,7 @@ reg('mosaicTiles', {
     if (!any) ctx.rect(-10, -10, 1, 1);
     ctx.clip();
     const fsz = D * p;
-    const bb = J.mainDraw(env, { text, font: Pm.font, size: fsz, x: W / 2, y: H / 2, lead, color: col, stroke: p * 1.2, strokeColor: col, strokeUnder: true, noHold: true, mi: 0 });
+    const bb = J.mainDraw(env, { text, txSlot: 'main', font: Pm.font, size: fsz, x: W / 2, y: H / 2, lead, color: col, stroke: p * 1.2, strokeColor: col, strokeUnder: true, noHold: true, mi: 0 });
     // tile-to-tile colour variation + bevel highlight
     if (env.pass === 'main') {
       for (let k = 0; k < L.length; k += 2) {
@@ -31326,6 +31375,8 @@ reg('maskReveal', {
     const A = [sc.accent, sc.fg].find(c => J.contrast(c, sc.bg) >= 1.8) || sc.fg;
     const B = [sc.fg, lightOf(sc), sc.accent2].find(c => c && c !== A && J.contrast(c, sc.bg) >= 1.8) || A;
     const sk = env.scale || 1, tb = env.ltb * Pm.speed;
+    const patternSource = flat(cut.lineText || cut.text);
+    const patternCopy = Pm.scene === 'lines' ? J.txDirect(env, patternSource, patternSource === flat(cut.text) ? 'main' : 'line') : null;
     // the scene seen through the letters, as a pattern / gradient in glyph space (it moves with time)
     const fillOf = () => {
       let pat = null;
@@ -31345,7 +31396,8 @@ reg('maskReveal', {
         tile = tileCv('dt' + A + B + T, T, T, (x, w, h) => { x.fillStyle = B; x.fillRect(0, 0, w, h); x.fillStyle = A; x.beginPath(); x.arc(w / 2, h / 2, w * 0.3, 0, J.TAU); x.fill(); });
         m2 = m2.rotate(Pm.ang).translate((tb * size * 0.3) % per, (tb * size * 0.3) % per).scale(per / T);
       } else {
-        const ls = size * 0.16, unit = flat(cut.lineText || cut.text) + '　・　', f = bodyF(env);
+        if (patternCopy == null) return B;
+        const ls = size * 0.16, unit = patternCopy + '　・　', f = bodyF(env);
         const uw = Math.max(ls, J.measure({ text: unit, font: f, size: ls }).w), rh = ls * 1.3;
         const Tw = Math.max(8, Math.round(uw * sk)), Th = Math.max(4, Math.round(rh * 2 * sk));
         tile = tileCv('ln' + unit + f + A + B + Tw + Th, Tw, Th, (x, w, h) => {
@@ -31383,7 +31435,7 @@ reg('contour', {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, u = U(env), lt = env.lt;
     const port = isPort(env);
     const out = tout(env);
-    const t0 = strip(cut.text);
+    const t0 = strip(env.__probe ? cut.text : J.txDirect(env, cut.text, 'main'));
     const kan = [...t0].filter(c => J.isKanji(c));
     const big = kan.length ? kan[0] : [...t0].filter(c => !J.isPunct(c) && !J.isSmallKana(c))[0] || [...t0][0] || '';
     const bs = Math.min(H * 0.95, W * (port ? 1.05 : 0.7));
@@ -31391,7 +31443,8 @@ reg('contour', {
     const lineC = Pm.col === 'accent' ? sc.accent : sc.sub;
     // contour rings: a fat stroke in the line colour, then a slightly thinner one in the ground colour → one thin line per level
     const cin = tin(env, 0, 0.5, E.outCubic) * out;
-    if (env.pass === 'main' && big && cin > 0.01) {
+    const contourText = big && J.txDirect(env, big, 'main:split');
+    if (env.pass === 'main' && contourText && cin > 0.01) {
       const K = Pm.rings, gap = bs * 0.03, lw = Math.max(1.2, bs * 0.0028);
       const ph = ((env.ltb * Pm.speed) % 1 + 1) % 1;
       const grow = E.outCubic(J.clamp(lt / 0.9));
@@ -31401,11 +31454,11 @@ reg('contour', {
         const wk = 2 * gap * (k - 1 + ph) * grow + gap * 0.6;
         const a = (k === K ? 1 - ph : 1) * (1 - 0.1 * k) * cin;
         if (a <= 0.01) continue;
-        ctx.globalAlpha = a * 0.8; ctx.strokeStyle = lineC; ctx.lineWidth = wk + lw; ctx.strokeText(big, bx, by);
-        ctx.globalAlpha = 0.94 * cin; ctx.strokeStyle = sc.bg; ctx.lineWidth = Math.max(0.1, wk - lw); ctx.strokeText(big, bx, by);
+        ctx.globalAlpha = a * 0.8; ctx.strokeStyle = lineC; ctx.lineWidth = wk + lw; ctx.strokeText(contourText, bx, by);
+        ctx.globalAlpha = 0.94 * cin; ctx.strokeStyle = sc.bg; ctx.lineWidth = Math.max(0.1, wk - lw); ctx.strokeText(contourText, bx, by);
       }
-      ctx.globalAlpha = 0.94 * cin; ctx.fillStyle = sc.bg; ctx.fillText(big, bx, by);
-      ctx.globalAlpha = cin; ctx.strokeStyle = lineC; ctx.lineWidth = lw * 1.6; ctx.strokeText(big, bx, by);
+      ctx.globalAlpha = 0.94 * cin; ctx.fillStyle = sc.bg; ctx.fillText(contourText, bx, by);
+      ctx.globalAlpha = cin; ctx.strokeStyle = lineC; ctx.lineWidth = lw * 1.6; ctx.strokeText(contourText, bx, by);
       ctx.restore();
     }
     // the lyric, small and solid, in the calm area beside the big character
@@ -31450,14 +31503,15 @@ reg('halftoneBig', {
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, u = U(env), lt = env.lt;
     const port = isPort(env);
-    const text = brk(cut.text, port ? 4 : 5);
+    const text = J.txDirect(env, brk(cut.text, port ? 4 : 5), 'main');
+    if (text == null) return null; // neither the glyph nor its sampled tile/dot shape may remain
     const o = { track: -0.02, lead: 0.98 };
     const fitW = Pm.crop ? 1.12 : 0.9;
     const size = Math.min(J.fitSize(text, Pm.font, W * fitW, H * (port ? 0.6 : 0.8), o), u * 0.7);
     const m = J.measure(Object.assign({ text, font: Pm.font, size }, o));
     const dotC = [sc.fg, lightOf(sc)].find(c => J.contrast(c, sc.bg) >= 3) || sc.fg;
     const duoC = [sc.accent, sc.accent2].find(c => c && J.contrast(c, sc.bg) >= 1.6 && c !== dotC) || sc.sub;
-    const it = () => Object.assign({ text, font: Pm.font, size, x: W / 2, y: H / 2, color: dotC, mi: 0 }, o);
+    const it = () => Object.assign({ text, txSlot: 'main', font: Pm.font, size, x: W / 2, y: H / 2, color: dotC, mi: 0 }, o);
     if (Pm.mode === 'duo') {
       const d = size * 0.045;
       J.mainDraw(env, Object.assign(it(), { x: W / 2 + d, y: H / 2 + d, color: duoC, ghost: false }));
@@ -37144,6 +37198,7 @@ function clearLyrics() {
 let audioNameDefault = '';
 async function resetAll() {
   if (S.exporting) return;
+  invalidateWhisper(); WT.audioLoading = false;
   audioSeq++;                       // a pending analysis must not restore the song after reset starts
   if (S.tap) stopTap();
   pause();
@@ -37160,7 +37215,19 @@ async function resetAll() {
 function updateEditBtns() { const u = $('btnUndoEdit'); if (u) u.disabled = !ED.undo.length; }
 
 /* ---------------- AI歌詞文字起こし ---------------- */
-const WT = { busy: false, hasTotal: false };
+const WT = { busy: false, hasTotal: false, seq: 0, result: null, controller: null, audioLoading: false };
+function whisperCurrent(job) {
+  return !!job && job.seq === WT.seq && job.project === S.project && job.audio === S.audio && job.audioSeq === audioSeq;
+}
+function invalidateWhisper() {
+  WT.seq++; WT.result = null;
+  if (WT.controller) WT.controller.abort();
+  if ($('whisperPreview')) $('whisperPreview').value = '';
+  if ($('whisperResult')) $('whisperResult').hidden = true;
+  if ($('whisperProgressBox')) $('whisperProgressBox').hidden = true;
+  if ($('btnApplyWhisper')) $('btnApplyWhisper').disabled = true;
+  whisperDevice(null);
+}
 function whisperProgress(text, value, indeterminate) {
   const box = $('whisperProgressBox'), bar = $('whisperBar'), percent = $('whisperPercent');
   if (!box || !bar || !percent) return;
@@ -37204,6 +37271,7 @@ function whisperErrorText(err) {
   return '文字起こしに失敗しました。音声やブラウザのメモリを確認して、もう一度試してください。';
 }
 function applyWhisperLyrics(value) {
+  if (WT.busy || S.tap || S.exporting || !whisperCurrent(WT.result)) return false;
   const lyrics = String(value || '').trim(); if (!lyrics) return false;
   const P = S.project, snap = JSON.parse(edSnap());
   snap.ov = P.overrides || {}; snap.range = P.exportRange || null;
@@ -37216,35 +37284,54 @@ function applyWhisperLyrics(value) {
 }
 function setAIBusy(busy) {
   WT.busy = busy; WT.hasTotal = false;
-  const run = $('btnWhisper'), apply = $('btnApplyWhisper'), file = $('audioFile');
+  const run = $('btnWhisper'), apply = $('btnApplyWhisper'), discard = $('btnDiscardWhisper');
   if (run) run.disabled = busy;
-  if (busy && apply) apply.disabled = true;
-  if (file) file.disabled = busy;
+  if (apply) apply.disabled = busy || !whisperCurrent(WT.result);
+  if (discard) discard.hidden = !busy;
 }
-async function transcribeWhisperAudio(audioBuffer) {
+async function transcribeWhisperAudio(job) {
   if (!J.whisper || !J.whisper.transcribe) { const err = new Error('WHISPER_HANDOFF_FAILED'); err.code = 'WHISPER_HANDOFF_FAILED'; throw err; }
-  const out = await J.whisper.transcribe(audioBuffer, {
-    language: $('whisperLang').value,
-    model: $('whisperModel').value,
-    onProgress: onWhisperProgress,
+  const out = await J.whisper.transcribe(job.audio.buffer, {
+    language: job.language,
+    model: job.model,
+    signal: job.controller.signal,
+    onProgress: info => { if (whisperCurrent(job)) onWhisperProgress(info); },
   });
+  if (!whisperCurrent(job)) return;
+  WT.result = job;
   $('whisperPreview').value = out.lrc;
   $('whisperResult').hidden = false; $('btnApplyWhisper').disabled = false;
   whisperDevice(out.device); whisperProgress('文字起こし完了。内容を確認して歌詞欄へ反映してください。', 100, false);
 }
 async function runWhisper() {
-  if (WT.busy) return;
+  if (WT.busy || WT.audioLoading || S.tap || S.exporting) return;
   if (!S.audio || !S.audio.buffer) { whisperProgress('先に曲を読み込んでください。', 0, false); toast('先に曲を読み込んでください'); return; }
-  setAIBusy(true); pause(); whisperProgress('選択したAIモデルを準備中…（初回のみダウンロードします）', 0, true);
-  await new Promise(resolve => requestAnimationFrame(resolve));
-  try { await transcribeWhisperAudio(S.audio.buffer); }
-  catch (err) { console.error('[JIZURA Whisper] transcription failed', err, err && err.cause); whisperProgress(whisperErrorText(err), 0, false); }
-  finally { setAIBusy(false); }
+  invalidateWhisper();
+  const job = { seq: WT.seq, project: S.project, audio: S.audio, audioSeq,
+    language: $('whisperLang').value, model: $('whisperModel').value, controller: new AbortController() };
+  WT.controller = job.controller;
+  setAIBusy(true); pause(); whisperProgress('選択したAIモデルを準備中…（キャッシュがなければダウンロードします）', 0, true);
+  try {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (whisperCurrent(job)) await transcribeWhisperAudio(job);
+  }
+  catch (err) { if (whisperCurrent(job)) { console.error('[JIZURA Whisper] transcription failed', err, err && err.cause); whisperProgress(whisperErrorText(err), 0, false); } }
+  finally {
+    WT.controller = null; setAIBusy(false);
+    if (!whisperCurrent(job) && !$('whisperProgressBox').hidden) whisperProgress('結果を破棄しました。', 0, false);
+  }
 }
 function bindWhisper() {
   const run = $('btnWhisper'), apply = $('btnApplyWhisper'); if (!run || !apply) return;
+  $('whisperLang').value = document.documentElement.lang === 'en' ? 'english' : 'japanese';
+  apply.disabled = true;
+  $('btnDiscardWhisper').addEventListener('click', () => {
+    invalidateWhisper();
+    whisperProgress('結果を破棄しました。実行中の処理が終了するまで再実行をお待ちください。', 0, true);
+  });
   run.addEventListener('click', runWhisper);
   apply.addEventListener('click', () => {
+    if (WT.busy || S.tap || S.exporting || !whisperCurrent(WT.result)) return;
     const value = $('whisperPreview').value;
     if (!value.trim()) { whisperProgress('反映できる文字起こし結果がありません。', 0, false); return; }
     if (S.project.lyrics.trim() && !window.confirm('現在の歌詞をAI文字起こし結果で置き換えますか？\n元に戻すボタンまたは Ctrl+Z で取り消せます。')) return;
@@ -38136,6 +38223,7 @@ function bind() {
   $('resetDlg').addEventListener('close', () => { if ($('resetDlg').returnValue === 'reset') resetAll(); });
   $('fileProject').addEventListener('change', async e => {
     const f = e.target.files && e.target.files[0]; if (!f) return;
+    invalidateWhisper();
     try {
       S.project = mergeProject(JSON.parse(await f.text()));
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
@@ -38166,6 +38254,7 @@ function bind() {
 /* song file -> beat analysis (file input, or a host such as the After Effects panel) */
 let audioSeq = 0;
 async function loadAudioFile(f, restored) {
+  invalidateWhisper(); WT.audioLoading = true;
   const my = ++audioSeq;                      // only the latest choice may win (an earlier, slower analysis is dropped)
   $('audioName').textContent = '解析中…';
   try {
@@ -38180,6 +38269,7 @@ async function loadAudioFile(f, restored) {
     syncUI(); replan();
     return true;
   } catch (err) { if (my !== audioSeq) return false; $('audioName').textContent = '読み込めませんでした: ' + err.message; S.audio = null; return false; }
+  finally { if (my === audioSeq) WT.audioLoading = false; }
 }
 
 /* ---------------- かんたんモードの案内ツアー ---------------- */

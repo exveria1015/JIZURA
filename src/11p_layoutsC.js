@@ -229,6 +229,8 @@ function fastRow(env, text, font, size, x, y, sp, color, alpha, align = 'left') 
   if (env.pass !== 'main' || alpha <= 0.01 || !text) return;
   const ctx = env.ctx;
   if (!('letterSpacing' in ctx)) { env.draw({ text, font, size, x, y, align, track: sp / size, color, alpha, ghost: false }); return; }
+  text = J.txDirect(env, text);
+  if (text == null) return;
   ctx.save();
   ctx.font = J.fontCSS(font, size); ctx.letterSpacing = sp.toFixed(2) + 'px';
   ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.globalAlpha = alpha;

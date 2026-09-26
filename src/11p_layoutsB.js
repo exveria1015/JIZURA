@@ -1408,7 +1408,8 @@ J.register('layout', 'dotMatrix', {
   },
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, s = cut.seed, M = Math.min(W, H), lt = env.lt;
-    const mt = mainLines(cut.text, W, H, 8, 4);
+    const mt = J.txDirect(env, mainLines(cut.text, W, H, 8, 4), 'main');
+    if (mt == null) return null; // the lit-dot mask and scan column encode the lyric too
     const lines = mt.split('\n'), maxL = Math.max(...lines.map(l => J.glyphCount(l) || 1));
     const D = J.clamp(Math.floor(W * 0.86 / (maxL * M * 0.011)), 10, 16);
     const lead = 1.3;
@@ -1451,7 +1452,7 @@ J.register('layout', 'dotMatrix', {
     if (!any) ctx.rect(-10, -10, 1, 1);
     ctx.clip();
     const fsz = smp.fscale * p;
-    const bb = J.mainDraw(env, { text: mt, font: Pm.font, size: fsz, x: W / 2 + shift * p, y: H / 2, lead, color: litC, stroke: p * 0.9, strokeColor: litC, strokeUnder: true, noHold: true, ghost: false, mi: miAt(env, t0) });
+    const bb = J.mainDraw(env, { text: mt, txSlot: 'main', font: Pm.font, size: fsz, x: W / 2 + shift * p, y: H / 2, lead, color: litC, stroke: p * 0.9, strokeColor: litC, strokeUnder: true, noHold: true, ghost: false, mi: miAt(env, t0) });
     ctx.restore();
     // bright scan column at the sweep front
     if (Pm.reveal === 'sweep' && u > 0 && u < 1) {

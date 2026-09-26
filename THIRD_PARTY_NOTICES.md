@@ -47,3 +47,10 @@ Transformers.js and both Whisper models are licensed under the Apache License 2.
 - https://huggingface.co/onnx-community/whisper-base
 - https://huggingface.co/onnx-community/whisper-tiny
 - https://www.apache.org/licenses/LICENSE-2.0
+
+The fork pins model downloads to these revisions:
+
+- Base: `1846881b6b3a3024392c1eea3ad983695bc23925`
+- Tiny: `ff4177021cc41f7db950912b73ea4fdf7d01d8e7`
+
+Cached files may be evicted by the browser and downloaded again. External runtime code is fetched only when transcription is requested. No model weights are distributed in the repository.

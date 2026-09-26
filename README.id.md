@@ -1,5 +1,7 @@
 # JIZURA — Pembuat Video Lirik Bergerak
 
+> **Independent fork: exveria1015/JIZURA.** This development build has no hosted site. See [FORK.md](FORK.md) for local use and integration notes. Links to `852wa.github.io` below refer to the original upstream release.
+
 Buat video lirik bergerak langsung di browser. JIZURA menggabungkan layout, animasi masuk, gerakan saat teks bertahan, animasi keluar, dekorasi, efek teks, latar, gerakan kamera, efek, dan transisi. Ganti seed atau tekan **Buat variasi** untuk mencoba susunan lain.
 
 **[Buka aplikasi Bahasa Indonesia](https://852wa.github.io/JIZURA/id/)** · [Tiếng Việt](https://852wa.github.io/JIZURA/vi/) · [日本語](README.md) · [English](README.en.md) · [繁體中文](https://852wa.github.io/JIZURA/zh-hant/) · [简体中文](https://852wa.github.io/JIZURA/zh-hans/) · [한국어](https://852wa.github.io/JIZURA/ko/)

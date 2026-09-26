@@ -2,7 +2,7 @@
 Indonesian, Korean, and Vietnamese editions use the same glossary keys as English, with values in their own module (app/i18n_<code>.py):
 BODY / UI / EXPORT (Japanese phrase -> translation), STYLES {key: (name, description)}, MOODS {key: name},
 SAMPLE (sample lyrics), TITLE, DESCRIPTION. Effect part names use the English labels (app/english.js)."""
-import importlib, json
+import importlib, json, os
 
 # code, output folder, html lang, native name
 EDITIONS = [
@@ -23,7 +23,13 @@ MODULES = {
 COMMUNITY = {'zh-Hant': ('app.chinese', 'app/chinese.js'), 'ko': ('app.korean', 'app/korean.js')}
 # part-name scripts for editions without a community glossary (after app/english.js and the edition's own names)
 PART_NAMES = {'zh-Hans': 'app/chinese_hans.js'}
-BASE = 'https://852wa.github.io/JIZURA/'
+# Independent builds have no public canonical URL until explicitly configured.
+BASE = os.environ.get('JIZURA_SITE_URL', '').strip().rstrip('/')
+if BASE:
+    from urllib.parse import urlsplit
+    if urlsplit(BASE).scheme not in ('http', 'https') or not urlsplit(BASE).netloc:
+        raise ValueError('JIZURA_SITE_URL must be an absolute http(s) URL')
+    BASE += '/'
 
 
 class _Merged:

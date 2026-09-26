@@ -1,6 +1,7 @@
 """English copy for the browser edition. The Japanese source stays authoritative."""
 
 BODY = {
+    '<button id="btnDiscardWhisper" hidden>結果を破棄</button>': '<button id="btnDiscardWhisper" hidden>Discard result</button>',
     "レイアウトの文字制御": "Layout text control",
     "通し番号": "Serial number",
     "時刻": "Timecode",
@@ -24,11 +25,11 @@ BODY = {
     '<button class="exp-share primary" hidden>共有して保存</button>': '<button class="exp-share primary" hidden>Share / save</button>',
     '<label class="row center-dir" hidden>縦長のとき<select class="centerDirSel" aria-label="縦長の画面での分け方"><option value="tb">上下に分ける</option><option value="lr">左右に分ける</option></select></label>': '<label class="row center-dir" hidden>On tall frames<select class="centerDirSel" aria-label="Split on tall frames"><option value="tb">Top / bottom</option><option value="lr">Left / right</option></select></label>',
     '<h3 class="whisper-title">AI文字起こし</h3>': '<h3 class="whisper-title">AI transcription</h3>',
-    '<label class="field">言語\n              <select id="whisperLang"><option value="auto">自動判定</option><option value="japanese">日本語</option><option value="english">英語</option></select>': '<label class="field">Language\n              <select id="whisperLang"><option value="auto">Auto-detect</option><option value="japanese">Japanese</option><option value="english">English</option></select>',
+    '<label class="field">言語\n              <select id="whisperLang"><option value="japanese">日本語</option><option value="english">英語</option></select>': '<label class="field">Language\n              <select id="whisperLang"><option value="japanese">Japanese</option><option value="english">English</option></select>',
     '<label class="field">モデル\n              <select id="whisperModel"><option value="base">高精度 Base（推奨）</option><option value="tiny">高速 Tiny</option></select>': '<label class="field">Model\n              <select id="whisperModel"><option value="base">Accurate Base (recommended)</option><option value="tiny">Fast Tiny</option></select>',
     '<button id="btnWhisper" class="accent">AIで歌詞を文字起こし</button>': '<button id="btnWhisper" class="accent">Transcribe lyrics with AI</button>',
     '原曲を直接解析し、歌声を拾いやすい音量と帯域へ自動調整します。高精度 BaseはTinyより時間とメモリを使います。': 'The original mix is analyzed directly and adjusted automatically to make vocals easier to detect. Accurate Base uses more time and memory than Tiny.',
-    '初回のみ選択したAIモデルを読み込みます。ダウンロード後はブラウザにキャッシュされます。': 'The selected AI model is loaded on first use and then cached in this browser.',
+    '初回やキャッシュがない場合は、選択したAIモデルをダウンロードします。': 'The selected AI model is downloaded on first use or when it is not cached.',
     'aria-label="AI文字起こしの進行状況"': 'aria-label="AI transcription progress"',
     '<span id="whisperStatus" role="status" aria-live="polite">準備中</span>': '<span id="whisperStatus" role="status" aria-live="polite">Preparing</span>',
     '文字起こし結果（反映前に修正できます）': 'Transcription result (you can edit it before applying)',
@@ -182,13 +183,15 @@ BODY = {
 }
 
 UI = {
+    "'結果を破棄しました。実行中の処理が終了するまで再実行をお待ちください。'": "'Result discarded. Wait for the current operation to finish before running again.'",
+    "'結果を破棄しました。'": "'Result discarded.'",
     "レイアウトの文字制御": "Layout text control",
     "通し番号：表示": "Serial number: shown",
     "通し番号：非表示": "Serial number: hidden",
     "時刻：表示": "Timecode: shown",
     "時刻：非表示": "Timecode: hidden",
     "行の残り（前後の語）": "Rest of the line (neighbouring words)",
-    "その他（レイアウト独自の文字）": "Other (the layout's own lettering)",
+    "その他（レイアウト独自の文字）": "Other (layout lettering)",
     "時刻": "Timecode",
     "曲名": "Song title",
     "レイアウト文字": "Layout text",
@@ -239,7 +242,7 @@ UI = {
     "'AI文字起こし結果を歌詞欄に反映しました（あとから修正できます）'": "'AI transcription applied to the lyrics (you can edit it)'",
     "'先に曲を読み込んでください'": "'Load a song first'",
     "'AI文字起こし機能を準備できませんでした。'": "'AI transcription could not be prepared.'",
-    "'選択したAIモデルを準備中…（初回のみダウンロードします）'": "'Preparing the selected AI model… (downloaded on first use only)'",
+    "'選択したAIモデルを準備中…（キャッシュがなければダウンロードします）'": "'Preparing the selected AI model… (downloaded when not cached)'",
     "'文字起こし完了。内容を確認して歌詞欄へ反映してください。'": "'Transcription complete. Review it, then apply it to the lyrics.'",
     "'反映できる文字起こし結果がありません。'": "'There is no transcription result to apply.'",
     "'現在の歌詞をAI文字起こし結果で置き換えますか？\\n元に戻すボタンまたは Ctrl+Z で取り消せます。'": "'Replace the current lyrics with the AI transcription?\\nYou can undo this with Undo or Ctrl+Z.'",

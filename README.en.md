@@ -1,5 +1,7 @@
 # JIZURA — Lyric Motion Video Maker
 
+> **Independent fork: exveria1015/JIZURA.** This development build has no hosted site. See [FORK.md](FORK.md) for local use and integration notes. Links to `852wa.github.io` below refer to the original upstream release.
+
 Turn lyrics into animated lyric videos in your browser. JIZURA combines layouts, entrances, holds, exits, decorations, text treatments, backgrounds, camera moves, effects and transitions. Change the seed or press **Create a variation** to explore another arrangement.
 
 **[Open the English app](https://852wa.github.io/JIZURA/en/)** · [Bahasa Indonesia](https://852wa.github.io/JIZURA/id/) · [Tiếng Việt](https://852wa.github.io/JIZURA/vi/) · [Vietnamese guide](README.vi.md) · [日本語版](https://852wa.github.io/JIZURA/) · [繁體中文](https://852wa.github.io/JIZURA/zh-hant/) · [简体中文](https://852wa.github.io/JIZURA/zh-hans/) · [한국어](https://852wa.github.io/JIZURA/ko/) · [Korean guide](README.ko.md) · [Japanese guide](README.md)
@@ -12,7 +14,7 @@ The Japanese, English, Indonesian, Vietnamese, Traditional Chinese, Simplified C
 <summary><h2>Quick start</h2></summary>
 
 1. Paste lyrics into the left panel, one phrase per line. The built-in English sample is shown on a fresh install.
-2. Optionally import audio. JIZURA detects beats and can snap cut boundaries to them. Use **Tap to sync** to mark the start of each line by pressing Space during playback. **Transcribe lyrics with AI** adjusts the original mix for vocal-sensitive recognition, then runs multilingual Whisper Base (accurate) or Tiny (fast) in the browser and previews timestamped LRC lines before you explicitly apply them. Models are downloaded on first use and cached; WebGPU is preferred with automatic WASM fallback.
+2. Optionally import audio. JIZURA detects beats and can snap cut boundaries to them. Use **Tap to sync** to mark the start of each line by pressing Space during playback. **Transcribe lyrics with AI** adjusts the original mix for vocal-sensitive recognition, then runs multilingual Whisper Base (accurate) or Tiny (fast) in the browser and previews timestamped LRC lines before you explicitly apply them. Choose Japanese or English explicitly. Models are downloaded on first use or when the browser cache is unavailable; WebGPU is preferred, with WASM fallback if model initialization fails. Discarding a result prevents application but does not immediately stop a running download or inference.
 3. Press **Create a variation** (or `R`) to randomize the style, mood, motion, palette and arrangement. **Previous** and **Next** navigate variations; **Change one thing** rerolls just one part.
 4. Set aspect ratio, resolution and frame rate, then export MP4. Advanced mode adds a PNG sequence, transparent PNGs, color key backgrounds and individual technique controls.
 

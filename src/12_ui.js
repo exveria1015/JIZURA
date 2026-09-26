@@ -893,6 +893,7 @@ function clearLyrics() {
 let audioNameDefault = '';
 async function resetAll() {
   if (S.exporting) return;
+  invalidateWhisper(); WT.audioLoading = false;
   audioSeq++;                       // a pending analysis must not restore the song after reset starts
   if (S.tap) stopTap();
   pause();
@@ -909,7 +910,19 @@ async function resetAll() {
 function updateEditBtns() { const u = $('btnUndoEdit'); if (u) u.disabled = !ED.undo.length; }
 
 /* ---------------- AI歌詞文字起こし ---------------- */
-const WT = { busy: false, hasTotal: false };
+const WT = { busy: false, hasTotal: false, seq: 0, result: null, controller: null, audioLoading: false };
+function whisperCurrent(job) {
+  return !!job && job.seq === WT.seq && job.project === S.project && job.audio === S.audio && job.audioSeq === audioSeq;
+}
+function invalidateWhisper() {
+  WT.seq++; WT.result = null;
+  if (WT.controller) WT.controller.abort();
+  if ($('whisperPreview')) $('whisperPreview').value = '';
+  if ($('whisperResult')) $('whisperResult').hidden = true;
+  if ($('whisperProgressBox')) $('whisperProgressBox').hidden = true;
+  if ($('btnApplyWhisper')) $('btnApplyWhisper').disabled = true;
+  whisperDevice(null);
+}
 function whisperProgress(text, value, indeterminate) {
   const box = $('whisperProgressBox'), bar = $('whisperBar'), percent = $('whisperPercent');
   if (!box || !bar || !percent) return;
@@ -953,6 +966,7 @@ function whisperErrorText(err) {
   return '文字起こしに失敗しました。音声やブラウザのメモリを確認して、もう一度試してください。';
 }
 function applyWhisperLyrics(value) {
+  if (WT.busy || S.tap || S.exporting || !whisperCurrent(WT.result)) return false;
   const lyrics = String(value || '').trim(); if (!lyrics) return false;
   const P = S.project, snap = JSON.parse(edSnap());
   snap.ov = P.overrides || {}; snap.range = P.exportRange || null;
@@ -965,35 +979,54 @@ function applyWhisperLyrics(value) {
 }
 function setAIBusy(busy) {
   WT.busy = busy; WT.hasTotal = false;
-  const run = $('btnWhisper'), apply = $('btnApplyWhisper'), file = $('audioFile');
+  const run = $('btnWhisper'), apply = $('btnApplyWhisper'), discard = $('btnDiscardWhisper');
   if (run) run.disabled = busy;
-  if (busy && apply) apply.disabled = true;
-  if (file) file.disabled = busy;
+  if (apply) apply.disabled = busy || !whisperCurrent(WT.result);
+  if (discard) discard.hidden = !busy;
 }
-async function transcribeWhisperAudio(audioBuffer) {
+async function transcribeWhisperAudio(job) {
   if (!J.whisper || !J.whisper.transcribe) { const err = new Error('WHISPER_HANDOFF_FAILED'); err.code = 'WHISPER_HANDOFF_FAILED'; throw err; }
-  const out = await J.whisper.transcribe(audioBuffer, {
-    language: $('whisperLang').value,
-    model: $('whisperModel').value,
-    onProgress: onWhisperProgress,
+  const out = await J.whisper.transcribe(job.audio.buffer, {
+    language: job.language,
+    model: job.model,
+    signal: job.controller.signal,
+    onProgress: info => { if (whisperCurrent(job)) onWhisperProgress(info); },
   });
+  if (!whisperCurrent(job)) return;
+  WT.result = job;
   $('whisperPreview').value = out.lrc;
   $('whisperResult').hidden = false; $('btnApplyWhisper').disabled = false;
   whisperDevice(out.device); whisperProgress('文字起こし完了。内容を確認して歌詞欄へ反映してください。', 100, false);
 }
 async function runWhisper() {
-  if (WT.busy) return;
+  if (WT.busy || WT.audioLoading || S.tap || S.exporting) return;
   if (!S.audio || !S.audio.buffer) { whisperProgress('先に曲を読み込んでください。', 0, false); toast('先に曲を読み込んでください'); return; }
-  setAIBusy(true); pause(); whisperProgress('選択したAIモデルを準備中…（初回のみダウンロードします）', 0, true);
-  await new Promise(resolve => requestAnimationFrame(resolve));
-  try { await transcribeWhisperAudio(S.audio.buffer); }
-  catch (err) { console.error('[JIZURA Whisper] transcription failed', err, err && err.cause); whisperProgress(whisperErrorText(err), 0, false); }
-  finally { setAIBusy(false); }
+  invalidateWhisper();
+  const job = { seq: WT.seq, project: S.project, audio: S.audio, audioSeq,
+    language: $('whisperLang').value, model: $('whisperModel').value, controller: new AbortController() };
+  WT.controller = job.controller;
+  setAIBusy(true); pause(); whisperProgress('選択したAIモデルを準備中…（キャッシュがなければダウンロードします）', 0, true);
+  try {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (whisperCurrent(job)) await transcribeWhisperAudio(job);
+  }
+  catch (err) { if (whisperCurrent(job)) { console.error('[JIZURA Whisper] transcription failed', err, err && err.cause); whisperProgress(whisperErrorText(err), 0, false); } }
+  finally {
+    WT.controller = null; setAIBusy(false);
+    if (!whisperCurrent(job) && !$('whisperProgressBox').hidden) whisperProgress('結果を破棄しました。', 0, false);
+  }
 }
 function bindWhisper() {
   const run = $('btnWhisper'), apply = $('btnApplyWhisper'); if (!run || !apply) return;
+  $('whisperLang').value = document.documentElement.lang === 'en' ? 'english' : 'japanese';
+  apply.disabled = true;
+  $('btnDiscardWhisper').addEventListener('click', () => {
+    invalidateWhisper();
+    whisperProgress('結果を破棄しました。実行中の処理が終了するまで再実行をお待ちください。', 0, true);
+  });
   run.addEventListener('click', runWhisper);
   apply.addEventListener('click', () => {
+    if (WT.busy || S.tap || S.exporting || !whisperCurrent(WT.result)) return;
     const value = $('whisperPreview').value;
     if (!value.trim()) { whisperProgress('反映できる文字起こし結果がありません。', 0, false); return; }
     if (S.project.lyrics.trim() && !window.confirm('現在の歌詞をAI文字起こし結果で置き換えますか？\n元に戻すボタンまたは Ctrl+Z で取り消せます。')) return;
@@ -1885,6 +1918,7 @@ function bind() {
   $('resetDlg').addEventListener('close', () => { if ($('resetDlg').returnValue === 'reset') resetAll(); });
   $('fileProject').addEventListener('change', async e => {
     const f = e.target.files && e.target.files[0]; if (!f) return;
+    invalidateWhisper();
     try {
       S.project = mergeProject(JSON.parse(await f.text()));
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
@@ -1915,6 +1949,7 @@ function bind() {
 /* song file -> beat analysis (file input, or a host such as the After Effects panel) */
 let audioSeq = 0;
 async function loadAudioFile(f, restored) {
+  invalidateWhisper(); WT.audioLoading = true;
   const my = ++audioSeq;                      // only the latest choice may win (an earlier, slower analysis is dropped)
   $('audioName').textContent = '解析中…';
   try {
@@ -1929,6 +1964,7 @@ async function loadAudioFile(f, restored) {
     syncUI(); replan();
     return true;
   } catch (err) { if (my !== audioSeq) return false; $('audioName').textContent = '読み込めませんでした: ' + err.message; S.audio = null; return false; }
+  finally { if (my === audioSeq) WT.audioLoading = false; }
 }
 
 /* ---------------- かんたんモードの案内ツアー ---------------- */

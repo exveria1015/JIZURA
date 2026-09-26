@@ -18,7 +18,7 @@ def build(lang):
     title = 'JIZURA — Lyric Motion Video Maker' if english else m.TITLE if local else 'JIZURA 字面'
     description = ('Turn lyrics into animated lyric videos in your browser and export MP4.' if english else m.DESCRIPTION if local else '歌詞を入れると文字PV（リリックモーション）を自動で組み立てて MP4 に書き出すブラウザアプリ')
     folder = dict((c, f) for c, f, _, _ in i18n.EDITIONS)[lang]
-    canonical = i18n.BASE + (folder + '/' if folder else '')
+    canonical = i18n.BASE + (folder + '/' if folder else '') if i18n.BASE else ''
     language_nav = i18n.nav(lang)
     body = read('app/body.html').replace('@VERSION@', VERSION).replace('    <div class="acts">', '    ' + language_nav + '\n    <div class="acts">', 1)
     if english: body = localize_body(body)
@@ -32,7 +32,10 @@ def build(lang):
         if marker not in script: raise ValueError('Could not find browser UI entry point')
         inject = read('app/english.js') + ('\n' + i18n.labels_js(lang) if local else '')
         script = script.replace(marker, inject + '\n' + marker, 1)
-    alternates = '\n'.join(f'<link rel="alternate" hreflang="{hl}" href="{i18n.BASE}{f + "/" if f else ""}">' for c, f, hl, _ in i18n.EDITIONS)
+    from html import escape
+    canonical_meta = f'<link rel="canonical" href="{escape(canonical, quote=True)}">' if canonical else ''
+    og_url = f'<meta property="og:url" content="{escape(canonical, quote=True)}">' if canonical else ''
+    alternates = '\n'.join(f'<link rel="alternate" hreflang="{hl}" href="{escape(i18n.BASE + (f + "/" if f else ""), quote=True)}">' for c, f, hl, _ in i18n.EDITIONS) if i18n.BASE else ''
     html_lang = dict((c, hl) for c, _, hl, _ in i18n.EDITIONS)[lang]
     html = f'''<!doctype html>
 <html lang="{html_lang}">
@@ -41,12 +44,12 @@ def build(lang):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{description}">
-<link rel="canonical" href="{canonical}">
+{canonical_meta}
 {alternates}
 <meta property="og:type" content="website">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
-<meta property="og:url" content="{canonical}">
+{og_url}
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

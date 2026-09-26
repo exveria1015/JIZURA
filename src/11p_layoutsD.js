@@ -1782,13 +1782,15 @@ reg('wordSearch', {
           if (a <= 0.01) continue;
           let row = '';
           for (let c = 0; c < C; c++) row += onPath.has(r * 64 + c) ? '\u3000' : pool[J.h(s, r, c, 9) % NP];
+          row = J.txDirect(env, row, 'other');
+          if (row == null) continue;
           ctx.globalAlpha = a; ctx.fillText(row, gx + (cell - gs) / 2, gy + (r + 0.5) * cell);
         }
         ctx.restore();
       } else {
         const cellsTxt = [], pos = [];
         for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) { if (onPath.has(r * 64 + c)) continue; cellsTxt.push(pool[J.h(s, r, c, 9) % NP]); pos.push([gx + (c + 0.5) * cell, gy + (r + 0.5) * cell, r]); }
-        const it = { text: cellsTxt.join(''), font: Pm.gf, size: gs, x: 0, y: 0, color: sc.sub, ghost: false, alpha: 0.75 * out };
+        const it = { text: cellsTxt.join(''), txSlot: 'other', font: Pm.gf, size: gs, x: 0, y: 0, color: sc.sub, ghost: false, alpha: 0.75 * out };
         it._lay = J.layoutText(it);
         it.charFn = (i, g) => { const q = pos[i]; if (!q) return { hide: true }; const a = J.clamp(ga * (R + 2) - q[2]); return { dx: q[0] - g.x, dy: q[1] - g.y, a }; };
         env.draw(it);
@@ -2674,7 +2676,8 @@ reg('mosaicTiles', {
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, s = cut.seed, u = U(env), lt = env.lt;
     const port = isPort(env);
-    const text = brk(cut.text, port ? 4 : 7);
+    const text = J.txDirect(env, brk(cut.text, port ? 4 : 7), 'main');
+    if (text == null) return null; // neither the glyph nor its sampled tile/dot shape may remain
     const lead = 1.15, D = Pm.D;
     const smp = mosaicSample(text, Pm.font, D, lead);
     if (!smp.lit.length) return null;
@@ -2714,7 +2717,7 @@ reg('mosaicTiles', {
     if (!any) ctx.rect(-10, -10, 1, 1);
     ctx.clip();
     const fsz = D * p;
-    const bb = J.mainDraw(env, { text, font: Pm.font, size: fsz, x: W / 2, y: H / 2, lead, color: col, stroke: p * 1.2, strokeColor: col, strokeUnder: true, noHold: true, mi: 0 });
+    const bb = J.mainDraw(env, { text, txSlot: 'main', font: Pm.font, size: fsz, x: W / 2, y: H / 2, lead, color: col, stroke: p * 1.2, strokeColor: col, strokeUnder: true, noHold: true, mi: 0 });
     // tile-to-tile colour variation + bevel highlight
     if (env.pass === 'main') {
       for (let k = 0; k < L.length; k += 2) {
@@ -2766,6 +2769,8 @@ reg('maskReveal', {
     const A = [sc.accent, sc.fg].find(c => J.contrast(c, sc.bg) >= 1.8) || sc.fg;
     const B = [sc.fg, lightOf(sc), sc.accent2].find(c => c && c !== A && J.contrast(c, sc.bg) >= 1.8) || A;
     const sk = env.scale || 1, tb = env.ltb * Pm.speed;
+    const patternSource = flat(cut.lineText || cut.text);
+    const patternCopy = Pm.scene === 'lines' ? J.txDirect(env, patternSource, patternSource === flat(cut.text) ? 'main' : 'line') : null;
     // the scene seen through the letters, as a pattern / gradient in glyph space (it moves with time)
     const fillOf = () => {
       let pat = null;
@@ -2785,7 +2790,8 @@ reg('maskReveal', {
         tile = tileCv('dt' + A + B + T, T, T, (x, w, h) => { x.fillStyle = B; x.fillRect(0, 0, w, h); x.fillStyle = A; x.beginPath(); x.arc(w / 2, h / 2, w * 0.3, 0, J.TAU); x.fill(); });
         m2 = m2.rotate(Pm.ang).translate((tb * size * 0.3) % per, (tb * size * 0.3) % per).scale(per / T);
       } else {
-        const ls = size * 0.16, unit = flat(cut.lineText || cut.text) + '　・　', f = bodyF(env);
+        if (patternCopy == null) return B;
+        const ls = size * 0.16, unit = patternCopy + '　・　', f = bodyF(env);
         const uw = Math.max(ls, J.measure({ text: unit, font: f, size: ls }).w), rh = ls * 1.3;
         const Tw = Math.max(8, Math.round(uw * sk)), Th = Math.max(4, Math.round(rh * 2 * sk));
         tile = tileCv('ln' + unit + f + A + B + Tw + Th, Tw, Th, (x, w, h) => {
@@ -2823,7 +2829,7 @@ reg('contour', {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, u = U(env), lt = env.lt;
     const port = isPort(env);
     const out = tout(env);
-    const t0 = strip(cut.text);
+    const t0 = strip(env.__probe ? cut.text : J.txDirect(env, cut.text, 'main'));
     const kan = [...t0].filter(c => J.isKanji(c));
     const big = kan.length ? kan[0] : [...t0].filter(c => !J.isPunct(c) && !J.isSmallKana(c))[0] || [...t0][0] || '';
     const bs = Math.min(H * 0.95, W * (port ? 1.05 : 0.7));
@@ -2831,7 +2837,8 @@ reg('contour', {
     const lineC = Pm.col === 'accent' ? sc.accent : sc.sub;
     // contour rings: a fat stroke in the line colour, then a slightly thinner one in the ground colour → one thin line per level
     const cin = tin(env, 0, 0.5, E.outCubic) * out;
-    if (env.pass === 'main' && big && cin > 0.01) {
+    const contourText = big && J.txDirect(env, big, 'main:split');
+    if (env.pass === 'main' && contourText && cin > 0.01) {
       const K = Pm.rings, gap = bs * 0.03, lw = Math.max(1.2, bs * 0.0028);
       const ph = ((env.ltb * Pm.speed) % 1 + 1) % 1;
       const grow = E.outCubic(J.clamp(lt / 0.9));
@@ -2841,11 +2848,11 @@ reg('contour', {
         const wk = 2 * gap * (k - 1 + ph) * grow + gap * 0.6;
         const a = (k === K ? 1 - ph : 1) * (1 - 0.1 * k) * cin;
         if (a <= 0.01) continue;
-        ctx.globalAlpha = a * 0.8; ctx.strokeStyle = lineC; ctx.lineWidth = wk + lw; ctx.strokeText(big, bx, by);
-        ctx.globalAlpha = 0.94 * cin; ctx.strokeStyle = sc.bg; ctx.lineWidth = Math.max(0.1, wk - lw); ctx.strokeText(big, bx, by);
+        ctx.globalAlpha = a * 0.8; ctx.strokeStyle = lineC; ctx.lineWidth = wk + lw; ctx.strokeText(contourText, bx, by);
+        ctx.globalAlpha = 0.94 * cin; ctx.strokeStyle = sc.bg; ctx.lineWidth = Math.max(0.1, wk - lw); ctx.strokeText(contourText, bx, by);
       }
-      ctx.globalAlpha = 0.94 * cin; ctx.fillStyle = sc.bg; ctx.fillText(big, bx, by);
-      ctx.globalAlpha = cin; ctx.strokeStyle = lineC; ctx.lineWidth = lw * 1.6; ctx.strokeText(big, bx, by);
+      ctx.globalAlpha = 0.94 * cin; ctx.fillStyle = sc.bg; ctx.fillText(contourText, bx, by);
+      ctx.globalAlpha = cin; ctx.strokeStyle = lineC; ctx.lineWidth = lw * 1.6; ctx.strokeText(contourText, bx, by);
       ctx.restore();
     }
     // the lyric, small and solid, in the calm area beside the big character
@@ -2890,14 +2897,15 @@ reg('halftoneBig', {
   render(env) {
     const { W, H, sc, ctx } = env, cut = env.cut, Pm = cut.params, u = U(env), lt = env.lt;
     const port = isPort(env);
-    const text = brk(cut.text, port ? 4 : 5);
+    const text = J.txDirect(env, brk(cut.text, port ? 4 : 5), 'main');
+    if (text == null) return null; // neither the glyph nor its sampled tile/dot shape may remain
     const o = { track: -0.02, lead: 0.98 };
     const fitW = Pm.crop ? 1.12 : 0.9;
     const size = Math.min(J.fitSize(text, Pm.font, W * fitW, H * (port ? 0.6 : 0.8), o), u * 0.7);
     const m = J.measure(Object.assign({ text, font: Pm.font, size }, o));
     const dotC = [sc.fg, lightOf(sc)].find(c => J.contrast(c, sc.bg) >= 3) || sc.fg;
     const duoC = [sc.accent, sc.accent2].find(c => c && J.contrast(c, sc.bg) >= 1.6 && c !== dotC) || sc.sub;
-    const it = () => Object.assign({ text, font: Pm.font, size, x: W / 2, y: H / 2, color: dotC, mi: 0 }, o);
+    const it = () => Object.assign({ text, txSlot: 'main', font: Pm.font, size, x: W / 2, y: H / 2, color: dotC, mi: 0 }, o);
     if (Pm.mode === 'duo') {
       const d = size * 0.045;
       J.mainDraw(env, Object.assign(it(), { x: W / 2 + d, y: H / 2 + d, color: duoC, ghost: false }));

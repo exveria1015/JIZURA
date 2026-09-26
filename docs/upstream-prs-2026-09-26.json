@@ -1,0 +1,79 @@
+{
+  "checked_date": "2026-09-26",
+  "upstream": "852wa/JIZURA",
+  "fork": "exveria1015/JIZURA",
+  "baseline": "bae339e450512435b829a717248ea92ae5b44899",
+  "scope": "All 10 open pull requests at inventory time; historical closed PRs excluded.",
+  "pull_requests": [
+    {
+      "number": 25,
+      "title": "Fix excessive offscreen technique preview rendering",
+      "url": "https://github.com/852wa/JIZURA/pull/25",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "d8efbe23adf192ba3d1f64541a3da9712c4c11d2"
+    },
+    {
+      "number": 26,
+      "title": "Reset undo histories when opening another project",
+      "url": "https://github.com/852wa/JIZURA/pull/26",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "8bb6ba8e314cd2d134ca56c804998dea82a18b75"
+    },
+    {
+      "number": 27,
+      "title": "Discard pending audio analysis when resetting the project",
+      "url": "https://github.com/852wa/JIZURA/pull/27",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "59d2ab569c1458171f073cca9d895f7c4bf8f10a"
+    },
+    {
+      "number": 28,
+      "title": "Preserve late effects when locking lyric lines",
+      "url": "https://github.com/852wa/JIZURA/pull/28",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "595efed2217cfeb83f956244058a15a507d281ca"
+    },
+    {
+      "number": 29,
+      "title": "Reject PNG sequence exports that exceed ZIP32 limits",
+      "url": "https://github.com/852wa/JIZURA/pull/29",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "67939cedc6817eb8a516ac9b88f1f3ef7307a90c"
+    },
+    {
+      "number": 30,
+      "title": "Preserve timestamps and line edits in mixed LRC lyrics",
+      "url": "https://github.com/852wa/JIZURA/pull/30",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "ffc33ec8fec7c6976d91a37bd05833868c86473e"
+    },
+    {
+      "number": 31,
+      "title": "Validate manual lyric times against fixed timing anchors",
+      "url": "https://github.com/852wa/JIZURA/pull/31",
+      "head_repository": "exveria1015/JIZURA",
+      "head_sha": "4fb8cf81607310113c69e939f357a37ccfe19935"
+    },
+    {
+      "number": 32,
+      "title": "レイアウトの文字制御：カットごとにレイアウトの描く文字を出し分け＋通し番号／時刻の全体スイッチ",
+      "url": "https://github.com/852wa/JIZURA/pull/32",
+      "head_repository": "nocore-dtm/JIZURA",
+      "head_sha": "9fbf3728c1f4a47d5ea05b251c67b289cd662739"
+    },
+    {
+      "number": 33,
+      "title": "英語の歌詞で、自動でカットに分けるときに単語が切れたりくっついたりする",
+      "url": "https://github.com/852wa/JIZURA/pull/33",
+      "head_repository": "Zaious/JIZURA",
+      "head_sha": "c429254026084d96ffd94e4f421fc43bf9a1f6dd"
+    },
+    {
+      "number": 35,
+      "title": "Add browser-based AI lyric transcription",
+      "url": "https://github.com/852wa/JIZURA/pull/35",
+      "head_repository": "KoZo114/JIZURA",
+      "head_sha": "963ebe3f20d79c4e5af1c9eaadcc3e6d749d98e7"
+    }
+  ]
+}

@@ -148,7 +148,7 @@ const SPACED = /[A-Za-z\u00c0-\u024f\uac00-\ud7a3]/;   // scripts that put space
 const joinWords = ws => ws.reduce((s, w) => s + (s && !/[\u2013\u2014]$/.test(s) ? ' ' : '') + w, '');
 const segType = s => {
   if (/^\s+$/.test(s)) return 'S';
-  if ([...s].every(c => J.isPunct(c))) return 'P';
+  if ([...s].every(c => J.isPunct(c) || c === '\u2013' || c === '\u2014')) return 'P';
   if ([...s].some(c => J.isKanji(c))) return 'K';
   if ([...s].every(c => J.isHira(c) || c === 'ー')) return 'H';
   if ([...s].every(c => J.isKata(c) || c === 'ー')) return 'T';
@@ -202,7 +202,11 @@ J.chunkText = (text) => {
   }
   for (let i = out.length - 1; i > 0; i--) {
     // a lone Latin letter / hangul syllable after a Latin / hangul chunk is a word of its own (a, 나, 가 …) — keep the space
-    if ([...out[i]].length === 1 && !J.isKanji(out[i])) { out[i - 1] += (SPACED.test(out[i]) && SPACED.test(out[i - 1]) ? ' ' : '') + out[i]; out.splice(i, 1); }
+    if ([...out[i]].length === 1 && !J.isKanji(out[i])) {
+      out[i - 1] = SPACED.test(out[i]) && SPACED.test(out[i - 1])
+        ? joinWords([out[i - 1], out[i]]) : out[i - 1] + out[i];
+      out.splice(i, 1);
+    }
   }
   return out.length ? out : [text];
 };
@@ -288,7 +292,10 @@ J.computeTiming = (project, parsed, audio) => {
       // explicit time when the lines are a mixture of timed and untimed rows.
       if (parsed.mixedLrc && nextExplicit[i] != null) {
         const lo = i ? starts[i - 1] : 0;
-        s = Math.min(s, Math.max(lo, nextExplicit[i] - 0.35));
+        // A raw manual value may itself be clamped by a later LRC anchor.
+        // Keep the automatic prefix before that anchor as well.
+        const until = Math.min(nextExplicit[i], nextFixed[i] ?? Infinity);
+        s = Math.min(s, Math.max(lo, until - 0.35));
       }
     }
     starts.push(s);
@@ -685,7 +692,12 @@ J.plan = (project, audio) => {
       const k = kof[c.line] || 0; kof[c.line] = k + 1;
       const o = (project.overrides || {})[c.line] || {};
       const tx = o.cutText && (o.cutText[k] || o.cutText[String(k)]);
-      if (tx) c.tx = tx;
+      if (tx) {
+        c.tx = tx;
+        // Both bands are views of this cut: replacements and visibility
+        // controls apply independently to each band's layout text.
+        if (c.companion) c.companion.tx = tx;
+      }
     }
   }
   plan.events.sort((a, b) => a.t - b.t);
